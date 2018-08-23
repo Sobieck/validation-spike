@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,11 +10,11 @@ namespace ConsoleApp3
     {
         public override string Name => "length";
 
-        public override Task<ValidationResult> ValidateAsync(string fieldName, FormResponse template, Submission submission)
+        public override Task<ValidationResult> ValidateAsync(string fieldName, JToken parameters, Submission submission)
         {
             var value = Get(fieldName, submission);
-            var min = GetLengthContraint(fieldName, template, "min");
-            var max = GetLengthContraint(fieldName, template, "max");
+            var min = GetLengthContraint(fieldName, parameters, "min");
+            var max = GetLengthContraint(fieldName, parameters, "max");
             
             if (value == null && min != null)
             {
@@ -40,18 +41,10 @@ namespace ConsoleApp3
             return Task.FromResult(ValidationResult.Success);
         }
 
-        private int? GetLengthContraint(string fieldName, FormResponse template, string paramName)
+        private int? GetLengthContraint(string fieldName, JToken parameters, string paramName)
         {
-            var lengthParameters = template
-                            .Sections
-                            .SelectMany(x => x.Groups)
-                            .SelectMany(x => x.Fields)
-                            .First(x => x.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase))
-                            .Validators
-                            .First(x => x.Name.Equals(Name, StringComparison.OrdinalIgnoreCase))
-                            .Parameters;
-
-            var minToken = lengthParameters[paramName]?.ToString();
+  
+            var minToken = parameters[paramName]?.ToString();
 
             if (int.TryParse(minToken, out int result))
             {

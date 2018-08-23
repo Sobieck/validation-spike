@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace ConsoleApp3
     {
         public abstract Task<ValidationResult> ValidateAsync(
             string fieldName,
-            FormResponse template,
+            JToken template,
             Submission submission
         );
 
@@ -48,7 +49,7 @@ namespace ConsoleApp3
 
         public override Task<ValidationResult> ValidateAsync(
             string fieldName,
-            FormResponse template,
+            JToken template,
             Submission submission)
         {
             var value = Get(fieldName, submission);
