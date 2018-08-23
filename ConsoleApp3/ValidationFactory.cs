@@ -30,13 +30,18 @@ namespace ConsoleApp3
                 .SelectMany(x => x.Fields)
                 .Select(field => new
                 {
-                    name = field.Name,
-                    validators = field.Validators
+                    Name = field.Name,
+                    Validators = field.Validators
                         .SelectMany
                         (
                             definition => validators
-                                .Where(y => y.Name == definition.Name && 
-                                            definition.Conditions.All(c => conditions.Where(co => co.Name == c).Any(p => p.Evaluate(submission))))
+                                .Where(validator => 
+                                    validator.Name.Equals(definition.Name, StringComparison.OrdinalIgnoreCase) && 
+                                    definition.Conditions.All(definitionCondition => 
+                                        conditions.Where(co => 
+                                            co.Name.Equals(definitionCondition.Trim(), StringComparison.OrdinalIgnoreCase))
+                                            .Any(condition => 
+                                                condition.Evaluate(submission))))
                                 .ToList()
                         )
                 })
@@ -47,9 +52,9 @@ namespace ConsoleApp3
             foreach (var field in fields)
             {
                 var messages = new List<string>();
-                foreach (var validator in field.validators)
+                foreach (var validator in field.Validators)
                 {
-                    var result = await validator.ValidateAsync(field.name, template, submission);
+                    var result = await validator.ValidateAsync(field.Name, template, submission);
                     if (result == null) continue;
 
                     messages.Add(result.ErrorMessage);
@@ -59,7 +64,7 @@ namespace ConsoleApp3
                 {
                     validationMessages.Errors.Add(new ValidationMessage
                     {
-                        Field = field.name,
+                        Field = field.Name,
                         Messages = messages
                     });
                 }
